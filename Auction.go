@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"sync"
 )
 
@@ -92,6 +93,19 @@ func (n *AuctioneerNode) EndAuction() {
 	}
 }
 
+func pickRandomNode(nodes []*AuctioneerNode) *AuctioneerNode {
+	alive := []*AuctioneerNode{}
+	for _, n := range nodes {
+		if n != nil {
+			alive = append(alive, n)
+		}
+	}
+	if len(alive) == 0 {
+		return nil
+	}
+	return alive[rand.Intn(len(alive))]
+}
+
 // Demo
 func main() {
 	// Create 3 auctioneer nodes
@@ -99,6 +113,7 @@ func main() {
 	node2 := &AuctioneerNode{ID: 2, Auction: &Auction{}}
 	node3 := &AuctioneerNode{ID: 3, Auction: &Auction{}}
 
+	nodes := []*AuctioneerNode{node1, node2, node3}
 	// Set peers (full mesh)
 	node1.Peers = []*AuctioneerNode{node2, node3}
 	node2.Peers = []*AuctioneerNode{node1, node3}
@@ -145,11 +160,22 @@ func main() {
 				continue
 			}
 
-			outcome := node1.Bid(currentBidder, amount)
+			node := pickRandomNode(nodes)
+			if node == nil {
+				fmt.Println("No auctioneer nodes available!")
+				continue
+			}
+			outcome := node.Bid(currentBidder, amount)
+
 			fmt.Println("bid Outcome:", outcome)
 
 		case "result":
-			b := node1.Result()
+			node := pickRandomNode(nodes)
+			if node == nil {
+				fmt.Println("No nodes alive.")
+				continue
+			}
+			b := node.Result()
 			if b == nil {
 				fmt.Println("No bids yet.")
 			} else {
@@ -157,9 +183,14 @@ func main() {
 			}
 
 		case "end":
-			node1.EndAuction()
+			node := pickRandomNode(nodes)
+			if node == nil {
+				fmt.Println("Cannot end auction — no nodes alive.")
+				continue
+			}
+			node.EndAuction()
 
-			b := node1.Result()
+			b := node.Result()
 			if b == nil {
 				fmt.Println("No bids yet.")
 			} else {
