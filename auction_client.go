@@ -30,12 +30,12 @@ func main() {
 		return
 	}
 
-	nodeURL := os.Args[1] // e.g., http://localhost:8001
+	nodeURL := os.Args[1]
 	reader := bufio.NewReader(os.Stdin)
 	var currentBidder string
 
 	fmt.Println("Auction CLI connected to", nodeURL)
-	fmt.Println("Commands: login <name>, bid <amount>, result, exit")
+	fmt.Println("Commands: login <name>, bid <amount>, result, exit, end")
 
 	for {
 		fmt.Print("> ")
@@ -94,9 +94,6 @@ func main() {
 				fmt.Printf("Highest bid: %s with %d\n", result.Bidder, result.Amount)
 			}
 
-		case "exit":
-			return
-
 		case "end":
 			resp, err := http.Post(nodeURL+"/end", "application/json", nil)
 			if err != nil {
@@ -106,6 +103,9 @@ func main() {
 			var result map[string]string
 			json.NewDecoder(resp.Body).Decode(&result)
 			fmt.Println("Auction status:", result["status"])
+
+		case "exit":
+			return
 
 		default:
 			fmt.Println("Unknown command.")

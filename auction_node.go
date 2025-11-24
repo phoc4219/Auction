@@ -30,7 +30,7 @@ func (a *Auction) Bid(bidder string, amount int) Outcome {
 	if a.Ended {
 		return Fail
 	}
-	if a.HighestBid == nil || amount > a.HighestBid.Amount {
+	if a.HighestBid == nil || amount > a.HighestBid.Amount && amount != a.HighestBid.Amount {
 		a.HighestBid = &Bid{Bidder: bidder, Amount: amount}
 		return Success
 	}
