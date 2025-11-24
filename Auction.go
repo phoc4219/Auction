@@ -104,16 +104,73 @@ func main() {
 	node2.Peers = []*AuctioneerNode{node1, node3}
 	node3.Peers = []*AuctioneerNode{node1, node2}
 
-	// Bidding through any node
-	fmt.Println("Bidder1 bids 100:", node1.Bid("Bidder1", 100))
-	fmt.Println("Bidder2 bids 90:", node2.Bid("Bidder2", 90))
-	fmt.Println("Bidder2 bids 150:", node3.Bid("Bidder2", 150))
+	var currentBidder string = ""
 
-	// End auction
-	node1.EndAuction()
+	fmt.Println("Auction started. Commands:")
+	fmt.Println("  login <name>")
+	fmt.Println("  bid <amount>")
+	fmt.Println("  result")
+	fmt.Println("  end")
 
-	// Query result from any node
-	fmt.Println("Auction result from node1:", node1.Result())
-	fmt.Println("Auction result from node2:", node2.Result())
-	fmt.Println("Auction result from node3:", node3.Result())
+	var cmd string
+
+	for {
+		fmt.Print("> ")
+		_, err := fmt.Scan(&cmd)
+		if err != nil {
+			continue
+		}
+
+		switch cmd {
+		case "login":
+			var name string
+			_, err := fmt.Scan(&name)
+			if err != nil {
+				fmt.Println("Usage: login <name>")
+				continue
+			}
+			currentBidder = name
+			fmt.Println("Logged in as:", currentBidder)
+
+		case "bid":
+			if currentBidder == "" {
+				fmt.Println("You must login first. Use: login <name>")
+				continue
+			}
+
+			var amount int
+			_, err := fmt.Scan(&amount)
+			if err != nil {
+				fmt.Println("Invalid bid command. Usage: bid <amount>")
+				continue
+			}
+
+			outcome := node1.Bid(currentBidder, amount)
+			fmt.Println("bid Outcome:", outcome)
+
+		case "result":
+			b := node1.Result()
+			if b == nil {
+				fmt.Println("No bids yet.")
+			} else {
+				fmt.Printf("Highest bid: %s with %d\n", b.Bidder, b.Amount)
+			}
+
+		case "end":
+			node1.EndAuction()
+
+			b := node1.Result()
+			if b == nil {
+				fmt.Println("No bids yet.")
+			} else {
+				fmt.Printf("Highest bid: %s with %d\n", b.Bidder, b.Amount)
+			}
+
+			fmt.Println("Auction has finished.")
+			return
+
+		default:
+			fmt.Println("Error: Unknown command.")
+		}
+	}
 }
