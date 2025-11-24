@@ -189,6 +189,7 @@ func main() {
 				continue
 			}
 			node.EndAuction()
+			fmt.Println("Auction has finished.")
 
 			b := node.Result()
 			if b == nil {
@@ -197,7 +198,6 @@ func main() {
 				fmt.Printf("Highest bid: %s with %d\n", b.Bidder, b.Amount)
 			}
 
-			fmt.Println("Auction has finished.")
 			return
 
 		default:
